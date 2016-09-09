@@ -9,13 +9,17 @@ namespace BackendService
 {
     public class Service : ServiceBase
     {
+        public Service()
+        {
+            
+        }
         /// <summary>
         /// Executed when the service is started. TODO: Initializes the drink robots back-end.
         /// </summary>
         /// <param name="args">arguments</param>
         protected override void OnStart(string[] args)
         {
-            
+            // Check for db existance?
         }
         /// <summary>
         /// Executed when the service is stopped. TODO: Closing operations.
@@ -25,14 +29,14 @@ namespace BackendService
             
         }
         /// <summary>
-        /// Executed when the service is paused. Pauses the robots program cyclecycle.
+        /// Executed when the service is paused. TODO: Pauses the robots program cyclecycle.
         /// </summary>
         protected override void OnPause()
         {
             //TODO
         }
         /// <summary>
-        /// Executed when the service is continued. Resumes the robots program cycle.
+        /// Executed when the service is continued. TODO: Resumes the robots program cycle.
         /// </summary>
         protected override void OnContinue()
         {
