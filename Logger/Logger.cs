@@ -70,6 +70,7 @@ namespace Logger
             }
             messageToWrite += functionName + ":" + logMessage + Environment.NewLine; // Write function name and log message.
             File.AppendAllText(FullLogFile(), messageToWrite); // Write the generated string into the log file.
+            System.Diagnostics.Debug.WriteLine(messageToWrite);
         }
 
         /// <summary>

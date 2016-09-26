@@ -4,11 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO.Ports;
+using Logger;
 
 namespace Communication
 {
     interface iComm
     {
+        
+        /// <summary>
+        /// Send a command to the device
+        /// </summary>
+        /// <param name="command">String to be sent to the device, cannot be null.</param>
+        /// <returns>If the device responded accordingly</returns>
         bool send(string command);
     }
 
@@ -35,35 +42,35 @@ namespace Communication
             }
             catch (UnauthorizedAccessException)
             {
-                Console.Write("Access to serialport denied or already in use");
+                Log.WriteLine("_serialPort.Open()","Access to serialport denied or already in use", MessageLevel.Error);
                 throw;
             }
             catch (ArgumentOutOfRangeException)
             {
-                Console.Write("Serialport arguments are invalid");
+                Log.WriteLine("_serialPort.Open()", "Serialport arguments are invalid", MessageLevel.Error);
                 throw;
             }
             catch (ArgumentException)
             {
-                Console.Write("Portname not starting with COM or port type unsupported");
+                Log.WriteLine("_serialPort.Open()", "Portname not starting with COM or port type unsupportedd", MessageLevel.Error);
                 throw;
             }
             catch (InvalidOperationException)
             {
-                Console.Write("Serialport already open");
+                Log.WriteLine("_serialPort.Open()", "Serialport already open", MessageLevel.Warning);
             }
             catch (System.IO.IOException)
             {
-                Console.Write("Serialport at invalid state");
+                Log.WriteLine("_serialPort.Open()", "Serialport at invalid state", MessageLevel.Error);
                 throw;
             }
         }
         public bool send(string command)
         {
-            if (command == null || command.Length > 30)
+            if (command == null || command.Length > 50)
             {
-                Console.Write("Command null or longer than 30");
-                throw new ArgumentException("Command null or longer than 30");
+                Log.WriteLine("SerialComm.send()", "Command null or longer than 50", MessageLevel.Error);
+                throw new ArgumentException("Command null or longer than 50");
             }
             // Expected results
             string startAck = command + "STARTED";
@@ -76,13 +83,13 @@ namespace Communication
             // TODO: reaction to errors (retry etc.)
             catch (TimeoutException)
             {
-                Console.Write("Writing to serialport resulted a timeout");
+                Log.WriteLine("_serialPort.Write()", "Writing to serialport resulted a timeout", MessageLevel.Warning);
                 return false;
             }
             catch (InvalidOperationException)
             {
-                Console.Write("Tried to write to a closed serialport");
-                return false;
+                Log.WriteLine("_serialPort.Write()", "Tried to write to a closed serialport", MessageLevel.Error);
+                throw;
             }
             
             // Read response and compare to expected
@@ -99,11 +106,13 @@ namespace Communication
                     return true;
                 }else
                 {
+                    Log.WriteLine("_serialPort.ReadTo", "Expected from serial:" + doneAck + ", got: " + response, MessageLevel.Information);
                     return false;
                 }
         
             }else
             {
+                Log.WriteLine("_serialPort.ReadTo", "Expected from serial:" + startAck + ", got: " + response, MessageLevel.Information);
                 return false;
             }
         }
