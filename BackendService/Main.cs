@@ -1,7 +1,8 @@
 ﻿using System;
 using System.ServiceProcess;
 using Logger;
-
+using Communication;
+using System.Diagnostics;
 
 namespace BackendService
 {
@@ -18,6 +19,14 @@ namespace BackendService
 #if DEBUG // Debug launch:
             Log.WriteLine(function, "Starting back-end in debugging mode", MessageLevel.Debug);
             // todo: Debug launch here.
+            iComm serial = new SerialComm("COM10");
+            if (serial.send("A"))
+            {
+                Debug.Write("Testi OK");
+            }else
+            {
+                Debug.Write("U fuged up");
+            }
             Environment.Exit(0);
 #else
             Log.WriteLine(function, "Starting back-end service", MessageLevel.Debug);

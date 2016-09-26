@@ -8,9 +8,9 @@ using Logger;
 
 namespace Communication
 {
-    interface iComm
+    public interface iComm
     {
-        
+
         /// <summary>
         /// Send a command to the device
         /// </summary>
@@ -27,13 +27,13 @@ namespace Communication
             _serialPort = new SerialPort();
             _serialPort.PortName = portname;
             _serialPort.BaudRate = 9600;
-            _serialPort.Parity = 0;
-            _serialPort.DataBits = 0;
-            _serialPort.StopBits = 0;
-            _serialPort.Handshake =0;
+            _serialPort.Parity = Parity.None;
+            _serialPort.DataBits = 8;
+            _serialPort.StopBits = StopBits.One;
+            _serialPort.Handshake = Handshake.None;
 
             // Set the read/write timeouts
-            _serialPort.ReadTimeout = 500;
+            _serialPort.ReadTimeout = 20000;
             _serialPort.WriteTimeout = 500;
 
             try
@@ -42,7 +42,7 @@ namespace Communication
             }
             catch (UnauthorizedAccessException)
             {
-                Log.WriteLine("_serialPort.Open()","Access to serialport denied or already in use", MessageLevel.Error);
+                Log.WriteLine("_serialPort.Open()", "Access to serialport denied or already in use", MessageLevel.Error);
                 throw;
             }
             catch (ArgumentOutOfRangeException)
@@ -64,57 +64,61 @@ namespace Communication
                 Log.WriteLine("_serialPort.Open()", "Serialport at invalid state", MessageLevel.Error);
                 throw;
             }
+
         }
         public bool send(string command)
         {
-            if (command == null || command.Length > 50)
-            {
-                Log.WriteLine("SerialComm.send()", "Command null or longer than 50", MessageLevel.Error);
-                throw new ArgumentException("Command null or longer than 50");
-            }
-            // Expected results
-            string startAck = command + "STARTED";
-            string doneAck = command + "DONE";
-            // Write command
             try
             {
+                if (command == null || command.Length > 50)
+                {
+                    Log.WriteLine("SerialComm.send()", "Command null or longer than 50", MessageLevel.Error);
+                    throw new ArgumentException("Command null or longer than 50");
+                }
+                // Expected results
+                string startAck = command + "STARTED";
+                string doneAck = command + "DONE";
+                // Write command
+
                 _serialPort.WriteLine(command);
-            }
-            // TODO: reaction to errors (retry etc.)
-            catch (TimeoutException)
-            {
-                Log.WriteLine("_serialPort.Write()", "Writing to serialport resulted a timeout", MessageLevel.Warning);
-                return false;
-            }
-            catch (InvalidOperationException)
-            {
-                Log.WriteLine("_serialPort.Write()", "Tried to write to a closed serialport", MessageLevel.Error);
-                throw;
-            }
-            
-            // Read response and compare to expected
-            string response = _serialPort.ReadTo("!");
-            _serialPort.DiscardInBuffer();
-            if (response.Equals(startAck))
-            {
-                // Read second response
-                response = _serialPort.ReadTo("!");
+
+                // Read response and compare to expected
+
+
+                string response = _serialPort.ReadTo("!");
                 _serialPort.DiscardInBuffer();
-                // If action was complited, return true
-                if (response.Equals(doneAck))
+                if (response.Equals(startAck))
                 {
-                    return true;
-                }else
+                    // Read second response
+                    response = _serialPort.ReadTo("!");
+                    _serialPort.DiscardInBuffer();
+                    // If action was complited, return true
+                    if (response.Equals(doneAck))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        Log.WriteLine("_serialPort.ReadTo", "Expected from serial:" + doneAck + ", got: " + response, MessageLevel.Information);
+                        return false;
+                    }
+
+                }
+                else
                 {
-                    Log.WriteLine("_serialPort.ReadTo", "Expected from serial:" + doneAck + ", got: " + response, MessageLevel.Information);
+                    Log.WriteLine("_serialPort.ReadTo", "Expected from serial:" + startAck + ", got: " + response, MessageLevel.Information);
                     return false;
                 }
-        
-            }else
-            {
-                Log.WriteLine("_serialPort.ReadTo", "Expected from serial:" + startAck + ", got: " + response, MessageLevel.Information);
-                return false;
             }
+            catch (Exception Err)
+            {
+                Log.WriteLine("serialPort.send()", "Exception: " + Err.GetType().Name + ", message: " + Err.Message, MessageLevel.Warning);
+                throw;
+            }
+
         }
     }
 }
+
+
+    
