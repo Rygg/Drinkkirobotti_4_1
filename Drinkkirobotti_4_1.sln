@@ -6,9 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger", "Logger\Logger.csproj", "{88D7CB3B-FF08-4804-8CA8-46EA61367C42}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackendService", "BackendService\BackendService.csproj", "{66DAC840-6AA8-4CD0-9D33-D552A33E49CB}"
-	ProjectSection(ProjectDependencies) = postProject
-		{FE343B75-2940-4DFF-A6FE-2CC6ADB17364} = {FE343B75-2940-4DFF-A6FE-2CC6ADB17364}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseAccess", "DatabaseAccess\DatabaseAccess.csproj", "{2F349539-8F7B-4FB9-9895-532AE64C6BF2}"
 EndProject

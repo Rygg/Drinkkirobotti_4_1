@@ -19,7 +19,7 @@ namespace BackendService
 #if DEBUG // Debug launch:
             Log.WriteLine(function, "Starting back-end in debugging mode", MessageLevel.Debug);
             // todo: Debug launch here.
-            iComm serial = new SerialComm("COM10");
+            iComm serial = new DummyComm();
             if (serial.send("TEST"))
             {
                 Debug.Write("Serial communication test passed\n");

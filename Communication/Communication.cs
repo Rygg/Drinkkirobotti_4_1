@@ -19,6 +19,18 @@ namespace Communication
         bool send(string command);
     }
 
+    /// <summary>
+    /// A Dummy class for testing. Returns always true after 2 seconds
+    /// </summary>
+    public class DummyComm : iComm
+    {
+        public bool send(string command)
+        {
+            System.Threading.Thread.Sleep(2000);
+            Log.WriteLine("DummyComm.send()", "Dummy interface message: " + command + " delivered", MessageLevel.Debug);
+            return true;
+        }
+    }
     public class SerialComm : iComm
     {
         private SerialPort _serialPort;
