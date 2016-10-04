@@ -8,6 +8,7 @@ using Logger;
 
 namespace Communication
 {
+    
     public interface iComm
     {
 
@@ -33,24 +34,39 @@ namespace Communication
     }
     public class SerialComm : iComm
     {
+        
         private SerialPort _serialPort;
-        public SerialComm(string portname)
+        private string _endstring;
+        /// <summary>
+        /// Creates a serialport connection
+        /// </summary>
+        /// <param name="portname">The name of the port ex. COM3</param>
+        /// <param name="endstring">Optional: string which the connected device uses to indicate end of message, default = !</param>
+        /// <param name="baudrate">Optional: baudrate to use, default = 9600</param>
+        /// <param name="readtimeout">Optional: time to wait for responses, default = 20000</param>
+        public SerialComm(string portname, string endstring = "!", int baudrate = 9600, int readtimeout = 20000)
         {
+            _endstring = endstring;
             _serialPort = new SerialPort();
             _serialPort.PortName = portname;
-            _serialPort.BaudRate = 9600;
+            _serialPort.BaudRate = baudrate;
             _serialPort.Parity = Parity.None;
             _serialPort.DataBits = 8;
             _serialPort.StopBits = StopBits.One;
             _serialPort.Handshake = Handshake.None;
 
             // Set the read/write timeouts
-            _serialPort.ReadTimeout = 20000;
+            _serialPort.ReadTimeout = readtimeout;
             _serialPort.WriteTimeout = 500;
 
             try
             {
+                Log.WriteLine("_serialPort.Open()", "Opening serialport " + portname, MessageLevel.Debug);
                 _serialPort.Open();
+                if (_serialPort.IsOpen)
+                {
+                    Log.WriteLine("_serialPort.Open()", "Serialport " + portname + " opened", MessageLevel.Debug);
+                }
             }
             catch (UnauthorizedAccessException)
             {
@@ -82,10 +98,10 @@ namespace Communication
         {
             try
             {
-                if (command == null || command.Length > 50)
+                if (String.IsNullOrEmpty(command) || command.Length > 50)
                 {
-                    Log.WriteLine("SerialComm.send()", "Command null or longer than 50", MessageLevel.Error);
-                    throw new ArgumentException("Command null or longer than 50");
+                    Log.WriteLine("SerialComm.send()", "Command null, empty or longer than 50", MessageLevel.Error);
+                    throw new ArgumentException("Command null, empty or longer than 50");
                 }
                 // Expected results
                 string startAck = command + "STARTED";
@@ -97,12 +113,12 @@ namespace Communication
                 // Read response and compare to expected
 
 
-                string response = _serialPort.ReadTo("!");
+                string response = _serialPort.ReadTo(_endstring);
                 _serialPort.DiscardInBuffer();
                 if (response.Equals(startAck))
                 {
                     // Read second response
-                    response = _serialPort.ReadTo("!");
+                    response = _serialPort.ReadTo(_endstring);
                     _serialPort.DiscardInBuffer();
                     // If action was complited, return true
                     if (response.Equals(doneAck))
@@ -128,6 +144,16 @@ namespace Communication
                 throw;
             }
 
+        }
+    }
+    /// <summary>
+    /// Class for communication with digital input/output-pins
+    /// </summary>
+    public class DigitalIO : iComm
+    {
+        public bool send(string command)
+        {
+            throw new NotImplementedException();
         }
     }
 }
